@@ -12,8 +12,7 @@ __pycache__/
 data/training_data.csv
 data/sample_data.csv
 
-# Models (Optional: Keep if you want others to run it immediately, 
-# but usually large files are tracked via LFS or not uploaded)
+# Models
 # models/*.joblib 
 
 # IDE settings
