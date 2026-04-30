@@ -1,166 +1,192 @@
 """
-Quick Model Retraining Script
-This will retrain your models with better data
+Retrain all four classifiers from data/training_data.csv and write fresh
+.joblib artifacts to models/.
+
+Combines the original train_models.py (precision/recall/F1 reporting and
+summary table) with the config-driven structure and combine_datasets.py
+fallback of retrain_models.py.
+
+If data/training_data.csv is missing, this script will invoke
+combine_datasets.py to build it from the raw ISOT + WELFake sources.
+
+All hyperparameters are read from config.py — edit there to tune.
 """
 
-import pandas as pd
-import numpy as np
-import joblib
 import os
 import sys
+import subprocess
+import pandas as pd
+import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    classification_report,
+)
 
-# Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import config
 from src.data_processing import TextPreprocessor
 
-def retrain_all_models(data_path='data/training_data.csv'):
-    """Retrain all models with proper data"""
-    
-    print("=" * 60)
-    print("RETRAINING FAKE NEWS DETECTION MODELS")
-    print("=" * 60)
-    
-    # Check if training data already exists (skip creating new dataset if it does)
-    if not os.path.exists(data_path):
-        print("\nStep 1: Creating training dataset...")
-        if os.path.exists('download_dataset.py'):
-            exec(open('download_dataset.py').read())
-        else:
-            print("⚠️ download_dataset.py not found. Please ensure it exists or provide training_data.csv.")
-            return
-    else:
-        # Check dataset size
-        df_check = pd.read_csv(data_path)
-        if len(df_check) < 100:
-            print(f"\nStep 1: Dataset too small ({len(df_check)} samples), creating larger one...")
-            if os.path.exists('download_dataset.py'):
-                exec(open('download_dataset.py').read())
-            else:
-                print("⚠️ download_dataset.py not found. Using small dataset.")
-        else:
-            print(f"\nStep 1: Using existing dataset with {len(df_check)} samples")
-    
-    # Load the data
-    print("\nStep 2: Loading training data...")
-    if not os.path.exists(data_path):
-        fallback_path = 'data/training_data.csv' if data_path != 'data/training_data.csv' else 'data/sample_data.csv'
-        if os.path.exists(fallback_path):
-            data_path = fallback_path
-            print(f"⚠️  Using fallback: {data_path}")
-    
-    if not os.path.exists(data_path):
-        print(f"❌ Error: {data_path} not found.")
-        return
 
+def ensure_training_data(data_path: str) -> str:
+    """Make sure data_path exists. If not, build it via combine_datasets.py."""
+    if os.path.exists(data_path):
+        df_check = pd.read_csv(data_path)
+        if len(df_check) >= 100:
+            print(f"Step 1: Using existing dataset with {len(df_check):,} samples")
+            return data_path
+        print(f"Step 1: Dataset too small ({len(df_check)} samples) — rebuilding...")
+    else:
+        print("Step 1: training_data.csv not found — building from raw sources...")
+
+    builder = os.path.join(os.path.dirname(__file__), "combine_datasets.py")
+    if not os.path.exists(builder):
+        print(f"ERROR: {builder} not found and {data_path} is missing.")
+        print("Provide data/training_data.csv with columns text,label or restore combine_datasets.py.")
+        sys.exit(1)
+
+    subprocess.run([sys.executable, builder], check=True)
+
+    if not os.path.exists(data_path):
+        print(f"ERROR: combine_datasets.py ran but {data_path} still missing.")
+        sys.exit(1)
+    return data_path
+
+
+def build_models() -> dict:
+    """Instantiate the four classifiers from config hyperparameters."""
+    return {
+        "Naive Bayes": MultinomialNB(alpha=config.NB_ALPHA),
+        "Logistic Regression": LogisticRegression(
+            max_iter=config.LR_MAX_ITER,
+            random_state=config.RANDOM_STATE,
+        ),
+        "Random Forest": RandomForestClassifier(
+            n_estimators=config.RF_N_ESTIMATORS,
+            max_depth=config.RF_MAX_DEPTH,
+            random_state=config.RANDOM_STATE,
+        ),
+        "SVM": SVC(
+            kernel=config.SVM_KERNEL,
+            probability=True,
+            random_state=config.RANDOM_STATE,
+        ),
+    }
+
+
+def retrain_all_models(data_path: str = config.TRAINING_DATA_FILE) -> None:
+    print("=" * 80)
+    print("RETRAINING FAKE NEWS DETECTION MODELS")
+    print("=" * 80)
+
+    data_path = ensure_training_data(data_path)
+
+    print("\nStep 2: Loading training data...")
     df = pd.read_csv(data_path)
-    print(f"✓ Loaded {len(df)} samples from {data_path}")
-    print(f"  - Real news: {len(df[df['label']==0])} samples")
-    print(f"  - Fake news: {len(df[df['label']==1])} samples")
-    
-    # Preprocess text
-    print("\n🔤 Step 3: Preprocessing text...")
+    print(f"  Loaded {len(df):,} samples from {data_path}")
+    print(f"  Real news: {(df['label'] == 0).sum():,} | Fake news: {(df['label'] == 1).sum():,}")
+
+    print("\nStep 3: Preprocessing text (clean + tokenize + stopwords + lemmatize)...")
     preprocessor = TextPreprocessor()
-    df['processed_text'] = df['text'].apply(lambda x: preprocessor.preprocess(x))
-    
-    # Split data
-    X = df['processed_text'].values
-    y = df['label'].values
+    df["processed_text"] = df["text"].astype(str).apply(preprocessor.preprocess)
+
+    X = df["processed_text"].values
+    y = df["label"].values
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
+        X, y,
+        test_size=config.TEST_SIZE,
+        random_state=config.RANDOM_STATE,
+        stratify=y,
     )
-    print(f"✓ Train set: {len(X_train)} samples")
-    print(f"✓ Test set: {len(X_test)} samples")
-    
-    # Vectorize
-    print("\n🔢 Step 4: Vectorizing text (TF-IDF)...")
-    vectorizer = TfidfVectorizer(max_features=5000, ngram_range=(1, 2))
+    print(f"  Train: {len(X_train):,} | Test: {len(X_test):,}")
+
+    print(f"\nStep 4: Vectorizing (TF-IDF, max_features={config.MAX_FEATURES}, "
+          f"ngram_range={config.NGRAM_RANGE})...")
+    vectorizer = TfidfVectorizer(
+        max_features=config.MAX_FEATURES,
+        ngram_range=config.NGRAM_RANGE,
+        min_df=config.MIN_DF,
+        max_df=config.MAX_DF,
+    )
     X_train_vec = vectorizer.fit_transform(X_train)
     X_test_vec = vectorizer.transform(X_test)
-    print(f"✓ Vocabulary size: {len(vectorizer.vocabulary_)}")
-    
-    # Define models
-    models = {
-        'Naive Bayes': MultinomialNB(alpha=0.1),
-        'Logistic Regression': LogisticRegression(max_iter=1000, random_state=42),
-        'Random Forest': RandomForestClassifier(n_estimators=100, random_state=42, max_depth=20),
-        'SVM': SVC(kernel='linear', probability=True, random_state=42)
-    }
-    
-    print("\n🤖 Step 5: Training models...")
-    print("-" * 60)
-    
+    print(f"  Vocabulary size: {len(vectorizer.vocabulary_):,}")
+    print(f"  Feature matrix shape: {X_train_vec.shape}")
+
+    os.makedirs(config.MODELS_DIR, exist_ok=True)
+    joblib.dump(vectorizer, config.VECTORIZER_FILE)
+    print(f"  Saved vectorizer: {config.VECTORIZER_FILE}")
+
+    print("\nStep 5: Training models...")
+    print("-" * 80)
+
     results = []
-    for model_name, model in models.items():
+    for model_name, model in build_models().items():
         print(f"\nTraining {model_name}...")
-        
-        # Train
         model.fit(X_train_vec, y_train)
-        
-        # Predict
-        y_train_pred = model.predict(X_train_vec)
-        y_test_pred = model.predict(X_test_vec)
-        
-        # Calculate accuracy
-        train_acc = accuracy_score(y_train, y_train_pred)
-        test_acc = accuracy_score(y_test, y_test_pred)
-        
-        print(f"  ✓ Train Accuracy: {train_acc:.3f}")
-        print(f"  ✓ Test Accuracy:  {test_acc:.3f}")
-        
-        # Classification report
-        print("\n  Classification Report:")
-        report = classification_report(y_test, y_test_pred, 
-                                      target_names=['Real', 'Fake'],
-                                      digits=3)
-        print(report)
-        
-        results.append({
-            'model': model_name,
-            'train_acc': train_acc,
-            'test_acc': test_acc
-        })
-        
-        # Save model
-        model_filename = model_name.lower().replace(' ', '_') + '_model.joblib'
-        model_path = os.path.join('models', model_filename)
+
+        y_pred = model.predict(X_test_vec)
+        train_acc = accuracy_score(y_train, model.predict(X_train_vec))
+        test_acc = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred, average="weighted")
+        recall = recall_score(y_test, y_pred, average="weighted")
+        f1 = f1_score(y_test, y_pred, average="weighted")
+
+        print(f"  Train accuracy: {train_acc*100:.2f}%")
+        print(f"  Test accuracy:  {test_acc*100:.2f}%")
+        print(f"  Precision:      {precision*100:.2f}%")
+        print(f"  Recall:         {recall*100:.2f}%")
+        print(f"  F1-Score:       {f1*100:.2f}%")
+        print(classification_report(
+            y_test, y_pred,
+            target_names=["Real", "Fake"], digits=3,
+        ))
+
+        filename = model_name.lower().replace(" ", "_") + "_model.joblib"
+        model_path = os.path.join(config.MODELS_DIR, filename)
         joblib.dump(model, model_path)
-        print(f"  ✓ Saved to: {model_path}")
-    
-    # Save vectorizer
-    vectorizer_path = os.path.join('models', 'vectorizer.joblib')
-    joblib.dump(vectorizer, vectorizer_path)
-    print(f"\n✓ Saved vectorizer to: {vectorizer_path}")
-    
-    # Save training results
-    print("\n" + "=" * 60)
-    print("📊 TRAINING SUMMARY")
-    print("=" * 60)
-    for result in results:
-        print(f"{result['model']:20} | Train: {result['train_acc']:.3f} | Test: {result['test_acc']:.3f}")
-    
-    # Save results to file
-    with open('models/training_results.txt', 'w') as f:
+        print(f"  Saved: {model_path}")
+
+        results.append({
+            "Model": model_name,
+            "Train Acc": train_acc,
+            "Test Acc": test_acc,
+            "Precision": precision,
+            "Recall": recall,
+            "F1-Score": f1,
+        })
+
+    print("\n" + "=" * 80)
+    print("TRAINING SUMMARY")
+    print("=" * 80)
+    results_df = pd.DataFrame(results)
+    print(results_df.to_string(index=False))
+
+    summary_path = os.path.join(config.MODELS_DIR, "training_results.txt")
+    with open(summary_path, "w") as f:
         f.write("FAKE NEWS DETECTION - MODEL TRAINING RESULTS\n")
-        f.write("=" * 60 + "\n\n")
-        f.write(f"Training Data: {len(df)} articles\n")
-        f.write(f"Train/Test Split: {len(X_train)}/{len(X_test)}\n\n")
-        f.write("MODEL PERFORMANCE:\n")
-        f.write("-" * 60 + "\n")
-        for result in results:
-            f.write(f"\n{result['model'].upper().replace(' ', '_')}:\n")
-            f.write(f"  Train Accuracy: {result['train_acc']:.3f}\n")
-            f.write(f"  Test Accuracy: {result['test_acc']:.3f}\n")
-    
-    print("\n✅ ALL MODELS TRAINED AND SAVED SUCCESSFULLY!")
-    print("\n🚀 Next step: Restart your Flask app to use the new models")
-    print("   Run: .venv\\Scripts\\python.exe app.py")
+        f.write("=" * 80 + "\n\n")
+        f.write(f"Training data: {len(df):,} articles\n")
+        f.write(f"Train/Test split: {len(X_train):,} / {len(X_test):,}\n")
+        f.write(f"Features: {X_train_vec.shape[1]}\n")
+        f.write(f"TF-IDF: max_features={config.MAX_FEATURES}, ngram_range={config.NGRAM_RANGE}, "
+                f"min_df={config.MIN_DF}, max_df={config.MAX_DF}\n\n")
+        f.write("MODEL PERFORMANCE\n")
+        f.write("-" * 80 + "\n")
+        f.write(results_df.to_string(index=False))
+        f.write("\n")
+
+    print(f"\nResults saved to {summary_path}")
+    print("\nDone. Restart Flask: python app.py")
+
 
 if __name__ == "__main__":
     retrain_all_models()

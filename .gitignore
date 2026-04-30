@@ -8,10 +8,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Large Datasets
-data/training_data.csv
-data/sample_data.csv
-
 # Models
 # models/*.joblib 
 

@@ -90,6 +90,15 @@ def load_models():
 # Load models at startup
 models_loaded = load_models()
 
+if FACT_CHECKER_AVAILABLE:
+    try:
+        fact_checker = FactChecker()
+        print("Fact checker initialized.")
+    except Exception as e:
+        print(f"Fact checker init failed: {e}")
+        fact_checker = None
+        FACT_CHECKER_AVAILABLE = False
+
 @app.route('/')
 def home():
     """Render the professional UI as default home page"""
@@ -177,6 +186,17 @@ def predict():
         print(f"Votes: Fake={fake_votes}, Real={real_votes}")
         print(f"Avg Probabilities: Fake={avg_fake_prob:.1f}%, Real={avg_real_prob:.1f}%\n")
         
+        # Optional advisory fact check on the RAW text (digits still present)
+        fact_check_result = None
+        if FACT_CHECKER_AVAILABLE and fact_checker is not None:
+            try:
+                fact_check_result = fact_checker.analyze(text)
+                if fact_check_result.get('warnings'):
+                    print(f"Fact-check warnings: {fact_check_result['warnings']}")
+            except Exception as fc_err:
+                print(f"Fact checker skipped: {fc_err}")
+                fact_check_result = None
+
         # Prepare response
         result = {
             'success': True,
@@ -188,9 +208,10 @@ def predict():
             'real_votes': real_votes,
             'individual_results': individual_results,
             'model_used': 'Ensemble (Majority Vote)',
-            'decision_type': 'Multi-Model Consensus'
+            'decision_type': 'Multi-Model Consensus',
+            'fact_check': fact_check_result,
         }
-        
+
         return jsonify(result)
         
     except Exception as e:
@@ -205,7 +226,7 @@ def predict():
 @app.route('/about')
 def about():
     """Render the about page"""
-    return render_template('about_rebuilt.html')
+    return render_template('about.html')
 
 @app.route('/api/health')
 def health():

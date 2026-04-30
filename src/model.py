@@ -11,6 +11,7 @@ import os
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -44,18 +45,22 @@ class FakeNewsClassifier:
             Sklearn model object
         """
         models = {
-            "naive_bayes": MultinomialNB(alpha=1.0),
-            "random_forest": RandomForestClassifier(
-                n_estimators=100,
-                random_state=config.RANDOM_STATE,
-                max_depth=10,
-                min_samples_split=5
-            ),
+            "naive_bayes": MultinomialNB(alpha=config.NB_ALPHA),
             "logistic_regression": LogisticRegression(
                 random_state=config.RANDOM_STATE,
-                max_iter=1000,
-                C=1.0
-            )
+                max_iter=config.LR_MAX_ITER,
+                C=1.0,
+            ),
+            "random_forest": RandomForestClassifier(
+                n_estimators=config.RF_N_ESTIMATORS,
+                max_depth=config.RF_MAX_DEPTH,
+                random_state=config.RANDOM_STATE,
+            ),
+            "svm": SVC(
+                kernel=config.SVM_KERNEL,
+                probability=True,
+                random_state=config.RANDOM_STATE,
+            ),
         }
         
         if model_name not in models:
