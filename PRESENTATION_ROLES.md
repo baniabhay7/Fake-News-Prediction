@@ -7,7 +7,7 @@ The project is split into four logically separate areas. Each person owns ~2–3
 | # | Role | Owner | Files owned | Slide section | Time |
 |---|---|---|---|---|---|
 | 1 | **Data Engineer** | _(name)_ | `data/`, `combine_datasets.py` | Datasets & data pipeline | 3–4 min |
-| 2 | **ML Engineer** | _(name)_ | `retrain_models.py`, `config.py`, `src/model.py` | Models & training | 4–5 min |
+| 2 | **ML Engineer** | _(name)_ | `train_models.py`, `config.py`, `src/model.py` | Models & training | 4–5 min |
 | 3 | **Backend Engineer** | _(name)_ | `app.py`, `src/data_processing.py`, `src/fact_checker.py` | Application & ensemble logic | 3–4 min |
 | 4 | **Frontend / Demo / Docs** | _(name)_ | `templates/`, `tests/`, `PROJECT_GUIDE.md`, live demo | UI walkthrough + live demo + Q&A lead | 4–5 min |
 
@@ -60,7 +60,7 @@ Total presentation time: **15–18 minutes**, leaving ~5 min for Q&A.
 
 ### Owns
 
-- [retrain_models.py](retrain_models.py)
+- [train_models.py](train_models.py)
 - [config.py](config.py)
 - [src/model.py](src/model.py) — the OO classifier (used by tests)
 - All `.joblib` artifacts in `models/`
@@ -69,7 +69,7 @@ Total presentation time: **15–18 minutes**, leaving ~5 min for Q&A.
 ### What to study
 
 - §4 (TF-IDF), §5 (the four models), §7 (performance) of `PROJECT_GUIDE.md`
-- The training loop in `retrain_models.py`
+- The training loop in `train_models.py`
 - Why each model was chosen and what its hyperparameters mean
 
 ### Slide section: "How the models are trained"
@@ -173,7 +173,7 @@ Total presentation time: **15–18 minutes**, leaving ~5 min for Q&A.
    - Highlight the per-model vote breakdown and the fact-check warnings panel.
 3. **Slide C — Tests + reproducibility**
    - `pytest tests/` runs the test suite.
-   - Everything reproducible: `combine_datasets.py` → `retrain_models.py` → `app.py`. One command per stage.
+   - Everything reproducible: `combine_datasets.py` → `train_models.py` → `app.py`. One command per stage.
    - All hyperparameters live in [config.py](config.py) — one file to tune.
 
 ### Live demo script (~2 min)

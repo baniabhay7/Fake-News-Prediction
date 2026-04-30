@@ -120,7 +120,7 @@ You have **5 sample articles** pre-loaded:
 | `ModuleNotFoundError: pandas` | Wrong Python | Activate the virtualenv (`source .venv/bin/activate`). |
 | `LookupError: Resource punkt not found` | NLTK data missing | `python fix_nltk.py` |
 | `Fact checker not available: ...` | spaCy missing | `python -m spacy download en_core_web_sm` (or skip it; predictions still work). |
-| `Model X not found` | Missing `.joblib` files | `python retrain_models.py` (takes 5-10 min). |
+| `Model X not found` | Missing `.joblib` files | `python train_models.py` (takes 5-10 min). |
 | Port 5000 in use | Something else is running on 5000 | `lsof -ti:5000 | xargs kill` (macOS/Linux), or change `PORT` env var. |
 
 ---
@@ -153,7 +153,7 @@ This is a great closing slide:
 
 ```bash
 python combine_datasets.py    # 1. Build training_data.csv from raw datasets
-python retrain_models.py      # 2. Train and save all 4 models
+python train_models.py      # 2. Train and save all 4 models
 python app.py                 # 3. Run the web app
 ```
 
@@ -183,7 +183,7 @@ You're the Q&A lead. Your job is to:
 ### Questions YOU should answer
 
 - **"How do I run this myself?"**
-  Three commands: `combine_datasets.py`, `retrain_models.py`, `app.py`. Full instructions in `PROJECT_GUIDE.md` §9.
+  Three commands: `combine_datasets.py`, `train_models.py`, `app.py`. Full instructions in `PROJECT_GUIDE.md` §9.
 
 - **"Can I try a custom article?"**
   Yes — paste anything into the textarea. Hand the laptop to the questioner if there's time.

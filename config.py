@@ -1,5 +1,5 @@
 # Configuration settings for Fake News Detection App
-# Editing these values DOES change behavior — retrain_models.py reads from here.
+# Editing these values DOES change behavior — train_models.py reads from here.
 import os
 
 # Data paths
@@ -12,7 +12,7 @@ MODELS_DIR = "models"
 MODEL_NAMES = ["naive_bayes", "logistic_regression", "random_forest", "svm"]
 DEFAULT_MODEL = "svm"
 
-# TF-IDF vectorizer settings (used by retrain_models.py)
+# TF-IDF vectorizer settings (used by train_models.py)
 MAX_FEATURES = 5000
 NGRAM_RANGE = (1, 2)
 MIN_DF = 1
@@ -22,7 +22,7 @@ MAX_DF = 1.0
 RANDOM_STATE = 42
 TEST_SIZE = 0.2
 
-# Per-model hyperparameters (used by retrain_models.py and src/model.py)
+# Per-model hyperparameters (used by train_models.py and src/model.py)
 NB_ALPHA = 0.1
 LR_MAX_ITER = 1000
 RF_N_ESTIMATORS = 100

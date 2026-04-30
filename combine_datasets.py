@@ -105,7 +105,7 @@ def main():
 
     print("\nFinal label distribution:")
     print(final["label"].value_counts().to_string())
-    print("\nDone. Next: python retrain_models.py")
+    print("\nDone. Next: python train_models.py")
 
 
 if __name__ == "__main__":

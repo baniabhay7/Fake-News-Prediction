@@ -49,7 +49,7 @@ The team is building a fake news classifier. Given a news article, the system la
 
 | File | Rows | Purpose |
 |---|---|---|
-| `data/training_data.csv` | **11,632** (5,816 fake + 5,816 real) | The actual file `retrain_models.py` reads. Two columns only: `text, label`. Perfectly class-balanced. **This is what you produce.** |
+| `data/training_data.csv` | **11,632** (5,816 fake + 5,816 real) | The actual file `train_models.py` reads. Two columns only: `text, label`. Perfectly class-balanced. **This is what you produce.** |
 | `data/sample_data.csv` | 15 (8 real + 7 fake) | Tiny hand-picked demo set. **NOT the training set** — it's a small example file used only as a fallback if `training_data.csv` is missing. |
 
 It's important to be clear about this distinction in the presentation: `sample_data.csv` is just a few rows for show; the **real** training data is the 11,632-row balanced file you build.

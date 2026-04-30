@@ -1,15 +1,14 @@
 """
-Retrain all four classifiers from data/training_data.csv and write fresh
+Train all four classifiers from data/training_data.csv and write fresh
 .joblib artifacts to models/.
-
-Combines the original train_models.py (precision/recall/F1 reporting and
-summary table) with the config-driven structure and combine_datasets.py
-fallback of retrain_models.py.
 
 If data/training_data.csv is missing, this script will invoke
 combine_datasets.py to build it from the raw ISOT + WELFake sources.
 
 All hyperparameters are read from config.py — edit there to tune.
+
+Reports per-model accuracy, precision, recall, and F1-score, and writes a
+summary table to models/training_results.txt.
 """
 
 import os
@@ -82,9 +81,9 @@ def build_models() -> dict:
     }
 
 
-def retrain_all_models(data_path: str = config.TRAINING_DATA_FILE) -> None:
+def train_all_models(data_path: str = config.TRAINING_DATA_FILE) -> None:
     print("=" * 80)
-    print("RETRAINING FAKE NEWS DETECTION MODELS")
+    print("TRAINING FAKE NEWS DETECTION MODELS")
     print("=" * 80)
 
     data_path = ensure_training_data(data_path)
@@ -189,4 +188,4 @@ def retrain_all_models(data_path: str = config.TRAINING_DATA_FILE) -> None:
 
 
 if __name__ == "__main__":
-    retrain_all_models()
+    train_all_models()

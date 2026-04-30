@@ -3,7 +3,7 @@
 **Your role**: own the machine learning core. You explain *how raw text becomes numbers, which models we trained, what hyperparameters they use, and how well they perform*. You're the most technical part of the presentation.
 
 **Files you own**:
-- [retrain_models.py](../retrain_models.py) — the training script
+- [train_models.py](../train_models.py) — the training script
 - [config.py](../config.py) — single source of truth for every hyperparameter
 - [src/model.py](../src/model.py) — OO classifier wrapper used by tests
 - All `.joblib` files in `models/` — your trained artifacts
@@ -59,7 +59,7 @@ A word that appears in *every* document (e.g. *"news"* in a fake-news corpus) ge
 
 ### Our parameters
 
-Set in `config.py`, applied in `retrain_models.py`:
+Set in `config.py`, applied in `train_models.py`:
 
 ```python
 TfidfVectorizer(
@@ -95,7 +95,7 @@ We train four models from **four different model families**. This isn't decorati
 All hyperparameters live in [config.py](../config.py). To tune:
 
 ```python
-# Edit these in config.py and re-run python retrain_models.py
+# Edit these in config.py and re-run python train_models.py
 NB_ALPHA          = 0.1
 LR_MAX_ITER       = 1000
 RF_N_ESTIMATORS   = 100
@@ -164,7 +164,7 @@ Person 3's Flask app loads these directly at startup with `joblib.load()`. **No 
 
 ## 8. Tunability — `config.py` is the single source of truth
 
-Everything that affects training behavior is in [config.py](../config.py). Edit there → rerun `python retrain_models.py` → new models in `models/`. Mention this in the presentation: it's a real engineering win, not just paperwork. The original codebase had hardcoded values that diverged from `config.py`; we cleaned it up so tuning is one file away.
+Everything that affects training behavior is in [config.py](../config.py). Edit there → rerun `python train_models.py` → new models in `models/`. Mention this in the presentation: it's a real engineering win, not just paperwork. The original codebase had hardcoded values that diverged from `config.py`; we cleaned it up so tuning is one file away.
 
 ---
 
@@ -189,7 +189,7 @@ Everything that affects training behavior is in [config.py](../config.py). Edit 
   3–10 minutes total on a laptop, dominated by SVM's CV step. Naive Bayes trains in <1 second.
 
 - **"Could we add more models?"**
-  Yes — gradient boosting (XGBoost, LightGBM) would slot in cleanly. Add to the dict in `retrain_models.py` and the `AVAILABLE_MODELS` map in `app.py`.
+  Yes — gradient boosting (XGBoost, LightGBM) would slot in cleanly. Add to the dict in `train_models.py` and the `AVAILABLE_MODELS` map in `app.py`.
 
 ---
 

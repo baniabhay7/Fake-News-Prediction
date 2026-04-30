@@ -88,7 +88,7 @@ Open your browser and navigate to: `http://localhost:5000`
 To retrain models with a custom dataset:
 ```bash
 # Ensure your data is in data/training_data.csv
-python retrain_models.py
+python train_models.py
 ```
 
 ## 📊 Dataset

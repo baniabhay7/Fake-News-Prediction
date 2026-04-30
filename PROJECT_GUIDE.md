@@ -41,7 +41,7 @@ ISOT supplies the 2016–2017 political content the project's README mentions; W
 
 | File | Rows | Purpose |
 |---|---|---|
-| `data/training_data.csv` | **11,632** (5,816 fake + 5,816 real) | The actual file `retrain_models.py` reads. Two columns only: `text, label` (1 = fake, 0 = real). Perfectly class-balanced. |
+| `data/training_data.csv` | **11,632** (5,816 fake + 5,816 real) | The actual file `train_models.py` reads. Two columns only: `text, label` (1 = fake, 0 = real). Perfectly class-balanced. |
 | `data/sample_data.csv` | 15 (8 real + 7 fake) | Tiny hand-picked demo set illustrating the format. **It is not the training set** — it's only a small example file you can inspect or use as a smoke-test fallback. |
 
 ### How `training_data.csv` is assembled
@@ -86,7 +86,7 @@ Every article (training and prediction) goes through `TextPreprocessor.preproces
 
 ## 4. Vectorization (TF-IDF)
 
-Driven by [config.py](config.py), applied in [retrain_models.py](retrain_models.py):
+Driven by [config.py](config.py), applied in [train_models.py](train_models.py):
 
 ```python
 TfidfVectorizer(
@@ -104,7 +104,7 @@ TfidfVectorizer(
 | `min_df` | `1` | Keep terms even if they appear in only one document — needed because the corpus is moderately small. |
 | `max_df` | `1.0` | Don't filter very common terms — let TF-IDF weighting handle them. |
 
-Edit any of these in `config.py` and rerun `python retrain_models.py` — the new values will be used.
+Edit any of these in `config.py` and rerun `python train_models.py` — the new values will be used.
 
 ---
 
@@ -183,7 +183,7 @@ The ensemble's effective accuracy is at least as high as the best individual mod
 ```
 Fake-News-Prediction/
 ├── app.py                     # Flask app — loads .joblib files, runs ensemble + fact checker
-├── retrain_models.py          # Trainer — reads training_data.csv, writes .joblib files
+├── train_models.py          # Trainer — reads training_data.csv, writes .joblib files
 ├── combine_datasets.py        # Builds training_data.csv from the 3 raw datasets
 ├── config.py                  # ALL hyperparameters live here — single source of truth
 ├── requirements.txt           # Python dependencies
@@ -307,7 +307,7 @@ This loads ISOT + WELFake, drops empties, balances classes 50/50, samples down t
 ### Step B — Retrain the four models
 
 ```bash
-python retrain_models.py
+python train_models.py
 ```
 
 If `data/training_data.csv` doesn't exist, this script automatically calls `combine_datasets.py` first.
@@ -363,7 +363,7 @@ python -m unittest tests.test_model
 pytest tests/
 ```
 
-Tests cover the OO `FakeNewsClassifier` / `ModelComparison` path in `src/model.py`, which now supports all four models including SVM (so `ModelComparison.train_all_models` no longer raises). The Flask runtime uses the flat path in `app.py` + `retrain_models.py`, so end-to-end verification of the live system is best done by running the app and predicting on the bundled `SAMPLE_NEWS` examples.
+Tests cover the OO `FakeNewsClassifier` / `ModelComparison` path in `src/model.py`, which now supports all four models including SVM (so `ModelComparison.train_all_models` no longer raises). The Flask runtime uses the flat path in `app.py` + `train_models.py`, so end-to-end verification of the live system is best done by running the app and predicting on the bundled `SAMPLE_NEWS` examples.
 
 ---
 

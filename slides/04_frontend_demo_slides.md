@@ -106,7 +106,7 @@ If the live app crashes:
 python combine_datasets.py
 
 # 2. Train and save all 4 models + vectorizer
-python retrain_models.py
+python train_models.py
 
 # 3. Run the web app
 python app.py
@@ -126,7 +126,7 @@ python app.py
 
 ### Speaker notes
 
-> "The whole project reproduces from three commands. First, `combine_datasets.py` builds the training file from the raw datasets — Person 1 walked you through that. Second, `retrain_models.py` trains all four models with the hyperparameters from `config.py` and saves them as `.joblib` files. Third, `python app.py` boots the Flask app. That's it. Want to change a hyperparameter? Open `config.py`, edit one line, rerun the trainer, and you have new models in 5 minutes. We deliberately consolidated all tunable values into one file so iterating is fast."
+> "The whole project reproduces from three commands. First, `combine_datasets.py` builds the training file from the raw datasets — Person 1 walked you through that. Second, `train_models.py` trains all four models with the hyperparameters from `config.py` and saves them as `.joblib` files. Third, `python app.py` boots the Flask app. That's it. Want to change a hyperparameter? Open `config.py`, edit one line, rerun the trainer, and you have new models in 5 minutes. We deliberately consolidated all tunable values into one file so iterating is fast."
 
 ### Visual suggestion
 

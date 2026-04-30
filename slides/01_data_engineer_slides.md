@@ -102,7 +102,7 @@ training_data.csv
 
 | File | Rows | Purpose |
 |---|---|---|
-| `data/training_data.csv` | **11,632** (5,816 + 5,816) | The actual training file. Two columns: `text, label`. Used by `retrain_models.py`. |
+| `data/training_data.csv` | **11,632** (5,816 + 5,816) | The actual training file. Two columns: `text, label`. Used by `train_models.py`. |
 | `data/sample_data.csv` | 15 | A tiny demo file — NOT the training set. Just a small example illustrating the format. |
 
 **Hand-off**:
