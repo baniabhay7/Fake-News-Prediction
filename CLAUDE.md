@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-Run the Flask app (loads pre-trained models from `models/` at startup, serves on port 5000):
+Run the Flask app (loads pre-trained models from `models/` at startup, serves on port 4321):
 ```bash
 python app.py
 ```

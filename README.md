@@ -82,7 +82,7 @@ python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk
 ```bash
 python app.py
 ```
-Open your browser and navigate to: `http://localhost:5000`
+Open your browser and navigate to: `http://localhost:4321`
 
 ### Training Models
 To retrain models with a custom dataset:

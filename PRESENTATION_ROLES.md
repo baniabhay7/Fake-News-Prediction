@@ -183,14 +183,14 @@ Total presentation time: **15–18 minutes**, leaving ~5 min for Q&A.
    source .venv/bin/activate
    python app.py
    ```
-   Confirm the page loads at `http://localhost:5000`.
+   Confirm the page loads at `http://localhost:4321`.
 2. **Demo step 1** — pick "India Launches Gaganyaan Mission" from `SAMPLE_NEWS`. Click Predict. Show: 4-0 vote → REAL, ~95% confidence.
 3. **Demo step 2** — pick "200% Tax on Bank Deposits". Click Predict. Show: 4-0 vote → FAKE. Point at the fact-check warnings panel: "scam phrasing detected", "unrealistic percentage detected".
 4. **Demo step 3** — paste a borderline real article and show how the per-model breakdown changes. This is where you talk about the ensemble's value.
 
 ### Speaking points (4–5 min)
 
-> "Let me show you what this looks like end-to-end. _\[Open localhost:5000\]_ The user pastes any article into this box, hits Predict, and gets back a verdict in under a second. Look at the result card: it shows the **ensemble verdict**, the **confidence**, the **per-model votes**, and — if spaCy is installed — the fact-check warnings panel. _\[Demo a real article.\]_ Notice all four models agreed. _\[Demo a fake article.\]_ Same here — and the fact checker independently flags the suspicious '200%' number and the scam-style phrasing. The whole project is reproducible: one command builds the dataset, another retrains the models, a third runs the app. Every hyperparameter sits in `config.py` so you can tune and rerun in minutes."
+> "Let me show you what this looks like end-to-end. _\[Open localhost:4321\]_ The user pastes any article into this box, hits Predict, and gets back a verdict in under a second. Look at the result card: it shows the **ensemble verdict**, the **confidence**, the **per-model votes**, and — if spaCy is installed — the fact-check warnings panel. _\[Demo a real article.\]_ Notice all four models agreed. _\[Demo a fake article.\]_ Same here — and the fact checker independently flags the suspicious '200%' number and the scam-style phrasing. The whole project is reproducible: one command builds the dataset, another retrains the models, a third runs the app. Every hyperparameter sits in `config.py` so you can tune and rerun in minutes."
 
 ### Q&A this person should handle
 
@@ -230,7 +230,7 @@ Run this checklist 30 minutes before:
 python app.py
 
 # 2. Test endpoint responds
-curl http://localhost:5000/api/health
+curl http://localhost:4321/api/health
 # expect: {"status":"healthy","models_loaded":true,...}
 
 # 3. Tests pass

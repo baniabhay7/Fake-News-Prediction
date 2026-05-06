@@ -8,7 +8,7 @@ End-to-end walkthrough: what the project does, every dataset explained, how the 
 
 Given a news article (a paragraph of text), classify it as **REAL NEWS** or **FAKE NEWS**.
 
-It does this by running the input through **four independent classifiers** trained on a balanced labeled corpus, then taking a **majority vote**. Optionally, an entity- and pattern-based **fact checker** runs alongside and surfaces advisory warnings (suspicious numerical claims, scam-style phrasing, missing Wikipedia matches). The whole thing is exposed through a Flask web app at `http://localhost:5000`.
+It does this by running the input through **four independent classifiers** trained on a balanced labeled corpus, then taking a **majority vote**. Optionally, an entity- and pattern-based **fact checker** runs alongside and surfaces advisory warnings (suspicious numerical claims, scam-style phrasing, missing Wikipedia matches). The whole thing is exposed through a Flask web app at `http://localhost:4321`.
 
 Pipeline at a glance:
 
@@ -276,7 +276,7 @@ The repo ships with pre-trained `.joblib` files in `models/`, so you can run imm
 python app.py
 ```
 
-Open [http://localhost:5000](http://localhost:5000), paste a news article, click Predict.
+Open [http://localhost:4321](http://localhost:4321), paste a news article, click Predict.
 
 The `/predict` JSON response now includes a `fact_check` field with extracted entities, Wikipedia verification, and any pattern-based warnings — render or ignore it as you like in the frontend.
 

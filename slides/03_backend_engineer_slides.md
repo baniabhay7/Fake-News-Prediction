@@ -24,7 +24,7 @@ Each slide has:
 1. Load `vectorizer.joblib` into memory
 2. Load all 4 model `.joblib` files
 3. Initialize spaCy fact checker (graceful skip if missing)
-4. Start Flask on port 5000
+4. Start Flask on port 4321
 
 **HTTP routes:**
 
